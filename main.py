@@ -2,11 +2,12 @@
 import random
 from flask import Flask, request
 from pymessenger.bot import Bot
+import requests
 import passwords
 
 app = Flask(__name__)
 ACCESS_TOKEN = passwords.ACCESS_TOKEN
-VERIFY_TOKEN = 'VERIFY_TOKEN'
+VERIFY_TOKEN = passwords.VERIFY_TOKEN
 bot = Bot(ACCESS_TOKEN)
 
 
@@ -60,6 +61,10 @@ def send_message(recipient_id, response):
     bot.send_text_message(recipient_id, response)
     return "success"
 
+def get_hackathons():
+    r = requests.get('https://raw.githubusercontent.com/HHEU/wiki/master/docs/index.md')
+    print(r.content)
 
 if __name__ == "__main__":
+    get_hackathons()
     app.run()
