@@ -2,11 +2,12 @@
 import random
 from flask import Flask, request
 from pymessenger.bot import Bot
+import requests
 import passwords
 
 app = Flask(__name__)
 ACCESS_TOKEN = passwords.ACCESS_TOKEN
-VERIFY_TOKEN = 'VERIFY_TOKEN'
+VERIFY_TOKEN = passwords.VERIFY_TOKEN
 bot = Bot(ACCESS_TOKEN)
 
 
@@ -29,7 +30,7 @@ def receive_message():
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
                     if message['message'].get('text'):
-                        response_sent_text = get_message()
+                        response_sent_text = get_message(message['message']['text'])
                         send_message(recipient_id, response_sent_text)
                     # if user sends us a GIF, photo,video, or any other non-text item
                     if message['message'].get('attachments'):
@@ -47,11 +48,13 @@ def verify_fb_token(token_sent):
 
 
 # chooses a random message to send to the user
-def get_message():
-    sample_responses = ["You are stunning!", "We're proud of you.", "Keep on being you!",
-                        "We're greatful to know you :)"]
+def get_message(message_text):
+    if "next" in message_text and "hackathon" in message_text and "when" in message_text:
+        hackathons = get_hackathons()
+        return "The next hackathon is " + str(hackathons[5][1]) + " on " + str(hackathons[5][5])
     # return selected item to the user
-    return random.choice(sample_responses)
+    else:
+        return "Hey"
 
 
 # uses PyMessenger to send response to user
@@ -60,6 +63,23 @@ def send_message(recipient_id, response):
     bot.send_text_message(recipient_id, response)
     return "success"
 
+def get_hackathons():
+    r = requests.get('https://raw.githubusercontent.com/HHEU/wiki/master/docs/index.md')
+    f = open("hackathons.txt", "wb")
+    f.write(r.content)
+    f.close()
+
+    hackathons = []
+    f = open("hackathons.txt", "r")
+    save = False
+    for line in f:
+        if "# Events" in line:
+            save=True
+        if save:
+            hackathon = line.split("|")
+            hackathons.append(hackathon)
+    f.close()
+    return hackathons
 
 if __name__ == "__main__":
     app.run()
