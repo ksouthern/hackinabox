@@ -3,6 +3,7 @@ import random
 from flask import Flask, request
 from pymessenger.bot import Bot
 import requests
+import itertools
 import passwords
 
 app = Flask(__name__)
@@ -49,12 +50,28 @@ def verify_fb_token(token_sent):
 
 # chooses a random message to send to the user
 def get_message(message_text):
+    message_text = message_text.lower().strip()
+    hackathons = get_hackathons()
     if "next" in message_text and "hackathon" in message_text and "when" in message_text:
-        hackathons = get_hackathons()
+
         return "The next hackathon is " + str(hackathons[5][1]) + " on " + str(hackathons[5][5])
     # return selected item to the user
-    else:
-        return "Hey"
+    hackathon_name = None
+    hackathon_number = -1
+    for i in range(0, len(hackathons)):
+        if len(hackathons[i]) == len(hackathons[3]):
+            name = hackathons[i][1].strip().split(" ")[0:-1]
+            name_text = ""
+            for word in name:
+                name_text += word + " "
+            hackathon_names = name_text.strip()
+            if hackathon_names in message_text and len(hackathon_names)>4:
+                hackathon_name = hackathon_names
+                hackathon_number = i
+                break
+    if hackathon_name != None:
+        if "when" in message_text and "is" in message_text:
+            return hackathon_name +" next happens on the " + hackathons[i][5]
 
 
 # uses PyMessenger to send response to user
@@ -75,11 +92,20 @@ def get_hackathons():
     for line in f:
         if "# Events" in line:
             save=True
+        if '# Past Events' in line:
+            save = False
         if save:
-            hackathon = line.split("|")
+            hackathon = line.lower().split("|")
             hackathons.append(hackathon)
     f.close()
     return hackathons
 
 if __name__ == "__main__":
+    hackathons = get_hackathons()
+    name = hackathons[6][1].strip().split(" ")[0:-1]
+    name_text =""
+    for word in name:
+        name_text += word +" "
+    hackathon_name = name_text.strip()
+    print(get_message("When is IC Hacks"))
     app.run()
