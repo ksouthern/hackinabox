@@ -52,6 +52,7 @@ def verify_fb_token(token_sent):
 def get_message(message_text):
     message_text = message_text.lower().strip()
     hackathons = get_hackathons()
+    past_hackathons = get_past_hackathons()
     if "next" in message_text and "hackathon" in message_text and "when" in message_text:
 
         return "The next hackathon is " + str(hackathons[5][1]) + " on " + str(hackathons[5][5])
@@ -69,11 +70,28 @@ def get_message(message_text):
                 hackathon_name = hackathon_names
                 hackathon_number = i
                 break
+    for j in range(0, len(past_hackathons)):
+        if len(past_hackathons[j]) == len(past_hackathons[3]):
+            name = past_hackathons[j][1].strip().split(" ")[0:-1]
+            name_text = ""
+            for word in name:
+                name_text += word + " "
+            hackathon_names = name_text.strip()
+            if hackathon_names in message_text and len(hackathon_names)>4:
+                hackathon_name = hackathon_names
+                hackathon_number = j
+                break
     if hackathon_name != None:
         if "when" in message_text and "is" in message_text:
             return hackathon_name +" next happens on the " + hackathons[i][5]
-        if "size" in message_text or "big" in message_text:
+        if "when" in message_text and "was" in message_text:
+            return hackathon_name +" happened on the " + past_hackathons[j][5]
+        if ("size" in message_text or "big" in message_text) and "is" in message_text:
             return hackathon_name + " will have " + hackathons[i][4] + " hackers"
+        if ("size" in message_text or "big" in message_text) and "was" in message_text:
+            return hackathon_name + " had " + past_hackathons[j][4] + " hackers"
+        if "where" in message_text or "get to" in message_text:
+            return hackathon_name +" is at " + hackathons[i][3]
 
 
 # uses PyMessenger to send response to user
@@ -102,6 +120,24 @@ def get_hackathons():
     f.close()
     return hackathons
 
+def get_past_hackathons():
+    r = requests.get('https://raw.githubusercontent.com/HHEU/wiki/master/docs/index.md')
+    f = open("hackathons.txt", "wb")
+    f.write(r.content)
+    f.close()
+
+    hackathons = []
+    f = open("hackathons.txt", "r")
+    save = False
+    for line in f:
+        if '# Past Events' in line:
+            save = True
+        if save:
+            hackathon = line.lower().split("|")
+            hackathons.append(hackathon)
+    f.close()
+    return hackathons
+
 if __name__ == "__main__":
     hackathons = get_hackathons()
     name = hackathons[6][1].strip().split(" ")[0:-1]
@@ -109,5 +145,9 @@ if __name__ == "__main__":
     for word in name:
         name_text += word +" "
     hackathon_name = name_text.strip()
-    print(get_message("How big is durhack"))
+    #print(get_message("How big is durhack"))
+    #print(get_message("When is durhack?"))
+    #print(get_message("Where is durhack>"))
+    #print(get_message("When was hacknotts"))
+    #print(get_message("How big was hacknotts"))
     app.run()
