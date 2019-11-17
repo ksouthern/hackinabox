@@ -72,6 +72,8 @@ def get_message(message_text):
     if hackathon_name != None:
         if "when" in message_text and "is" in message_text:
             return hackathon_name +" next happens on the " + hackathons[i][5]
+        if "size" in message_text or "big" in message_text:
+            return hackathon_name + " will have " + hackathons[i][4] + " hackers"
 
 
 # uses PyMessenger to send response to user
@@ -107,5 +109,5 @@ if __name__ == "__main__":
     for word in name:
         name_text += word +" "
     hackathon_name = name_text.strip()
-    print(get_message("When is IC Hacks"))
+    print(get_message("How big is durhack"))
     app.run()
