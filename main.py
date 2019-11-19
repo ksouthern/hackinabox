@@ -84,7 +84,7 @@ def get_message(message_text):
     if hackathon_name != None:
         if "when" in message_text and "is" in message_text:
             return hackathon_name +" next happens on the " + hackathons[i][5]
-        if "when" in message_text and "was" in message_text:
+        if "when" in message_text and ("was" in message_text or "did" in message_text):
             return hackathon_name +" happened on the " + past_hackathons[j][5]
         if ("size" in message_text or "big" in message_text) and "is" in message_text:
             return hackathon_name + " will have " + hackathons[i][4] + " hackers"
@@ -92,7 +92,7 @@ def get_message(message_text):
             return hackathon_name + " had " + past_hackathons[j][4] + " hackers"
         if "where" in message_text or "get to" in message_text:
             return hackathon_name +" is at " + hackathons[i][3]
-
+    return "Hey!"
 
 # uses PyMessenger to send response to user
 def send_message(recipient_id, response):
@@ -132,7 +132,7 @@ def get_past_hackathons():
     for line in f:
         if '# Past Events' in line:
             save = True
-        if save:
+        if save and "|" in line:
             hackathon = line.lower().split("|")
             hackathons.append(hackathon)
     f.close()
@@ -145,9 +145,9 @@ if __name__ == "__main__":
     for word in name:
         name_text += word +" "
     hackathon_name = name_text.strip()
-    #print(get_message("How big is durhack"))
-    #print(get_message("When is durhack?"))
-    #print(get_message("Where is durhack>"))
-    #print(get_message("When was hacknotts"))
-    #print(get_message("How big was hacknotts"))
+    print(get_message("How big is durhack"))
+    print(get_message("When is durhack?"))
+    print(get_message("Where is durhack>"))
+    print(get_message("When was hacknotts"))
+    print(get_message("How big was hacknotts"))
     app.run()
